@@ -378,14 +378,25 @@ export default function App() {
     }
   };
 
-  const handleStatusChange = async (id: string, newStatus: VideoStatus) => {
+  const handleStatusChange = async (id: string, newStatus: VideoStatus, newDate?: string) => {
     const targetVideo = videos.find((v) => v.id === id);
     if (!targetVideo) return;
+
+    let dateToUse = targetVideo.scheduledDate || '';
+    if (newStatus === 'Scheduled' || newStatus === 'Published') {
+      if (newDate !== undefined) {
+        dateToUse = newDate;
+      } else if (!dateToUse) {
+        dateToUse = new Date().toISOString().slice(0, 16);
+      }
+    } else {
+      dateToUse = '';
+    }
 
     const updatedVideo: Video = {
       ...targetVideo,
       status: newStatus,
-      scheduledDate: newStatus === 'Scheduled' ? targetVideo.scheduledDate || new Date().toISOString().slice(0, 16) : '',
+      scheduledDate: dateToUse,
       updatedAt: new Date().toISOString(),
     };
 

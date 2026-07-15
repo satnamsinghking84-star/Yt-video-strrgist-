@@ -33,8 +33,8 @@ export default function CalendarView({ videos, channels, onSelectVideo }: Calend
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
-  // Scheduled videos
-  const scheduledVideos = videos.filter((v) => v.status === 'Scheduled' && v.scheduledDate);
+  // Scheduled or Published videos
+  const scheduledVideos = videos.filter((v) => (v.status === 'Scheduled' || v.status === 'Published') && v.scheduledDate);
 
   // Group videos by day of current month
   const getVideosForDay = (day: number) => {
@@ -147,10 +147,10 @@ export default function CalendarView({ videos, channels, onSelectVideo }: Calend
         })}
       </div>
 
-      {/* Scheduled Video Details List below Grid */}
+      {/* Scheduled/Published Content Details List below Grid */}
       <div className="mt-6 border-t border-gray-100 dark:border-[#2A2F3B] pt-4">
         <h4 className="text-xs font-bold text-gray-900 dark:text-[#F0F1F4] mb-3 font-display">
-          Month Ke Scheduled Videos ({scheduledVideos.filter(v => {
+          Month Ka Scheduled & Published Content ({scheduledVideos.filter(v => {
             const vD = new Date(v.scheduledDate);
             return vD.getFullYear() === year && vD.getMonth() === month;
           }).length})
@@ -158,7 +158,7 @@ export default function CalendarView({ videos, channels, onSelectVideo }: Calend
         <div className="flex flex-col gap-2.5 max-h-[220px] overflow-y-auto pr-1">
           {scheduledVideos.length === 0 ? (
             <p className="text-xs text-gray-400 dark:text-[#6A7180] py-3 text-center font-sans">
-              Is month me koi video scheduled nahi hai
+              Is month me koi content scheduled ya published nahi hai
             </p>
           ) : (
             scheduledVideos
@@ -182,15 +182,22 @@ export default function CalendarView({ videos, channels, onSelectVideo }: Calend
                     <div className="flex items-center gap-2.5 min-w-0">
                       <span className="w-1.5 h-7 rounded-full flex-shrink-0" style={{ backgroundColor: chan?.color || '#8A93A6' }} />
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-gray-900 dark:text-[#F0F1F4] truncate font-sans flex items-center gap-1.5">
-                          <span className={`px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider font-extrabold border ${
+                        <p className="text-xs font-bold text-gray-900 dark:text-[#F0F1F4] truncate font-sans flex items-center gap-1.5 flex-wrap">
+                          <span className={`px-1.5 py-0.5 rounded text-[8.5px] uppercase tracking-wider font-extrabold border ${
                             v.contentType === 'Post'
                               ? 'bg-[#E11D2E]/10 text-[#E11D2E] border-[#E11D2E]/15'
                               : 'bg-[#2557C7]/10 text-[#2557C7] border-[#2557C7]/15'
                           }`}>
                             {v.contentType === 'Post' ? 'Post' : 'Video'}
                           </span>
-                          <span>{v.title}</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[8.5px] uppercase tracking-wider font-extrabold border ${
+                            v.status === 'Published'
+                              ? 'bg-[#158A4C]/10 text-[#158A4C] border-[#158A4C]/15'
+                              : 'bg-[#2557C7]/10 text-[#2557C7] border-[#2557C7]/15'
+                          }`}>
+                            {v.status}
+                          </span>
+                          <span className="truncate">{v.title}</span>
                         </p>
                         <p className="text-[10px] text-gray-400 dark:text-[#6A7180] font-sans">
                           {chan?.name || 'Unknown Channel'}

@@ -81,8 +81,8 @@ export default function VideoModal({
       setError(contentType === 'Post' ? 'Post ka title/caption dalein' : 'Title dalein');
       return;
     }
-    if (status === 'Scheduled' && !scheduledDate) {
-      setError('Scheduled Date & Time select karein');
+    if ((status === 'Scheduled' || status === 'Published') && !scheduledDate) {
+      setError(status === 'Scheduled' ? 'Scheduled Date & Time select karein' : 'Published Date & Time select karein');
       return;
     }
 
@@ -93,7 +93,7 @@ export default function VideoModal({
       script: script.trim(),
       voiceNotes: voiceNotes.trim(),
       status,
-      scheduledDate: status === 'Scheduled' ? scheduledDate : '',
+      scheduledDate: (status === 'Scheduled' || status === 'Published') ? scheduledDate : '',
       contentType,
     });
   };
@@ -269,10 +269,10 @@ export default function VideoModal({
             </div>
           </div>
 
-          {status === 'Scheduled' && (
+          {(status === 'Scheduled' || status === 'Published') && (
             <div className="field animate-fadeIn">
               <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
-                Scheduled Date & Time
+                {status === 'Scheduled' ? 'Scheduled Date & Time' : 'Published Date & Time'}
               </label>
               <input
                 type="datetime-local"

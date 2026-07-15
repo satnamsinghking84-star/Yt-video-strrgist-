@@ -7,7 +7,7 @@ interface DetailModalProps {
   onClose: () => void;
   video: Video | null;
   channels: Channel[];
-  onStatusChange: (id: string, newStatus: VideoStatus) => void;
+  onStatusChange: (id: string, newStatus: VideoStatus, newDate?: string) => void;
   onChecklistToggle: (id: string, key: keyof Video['checklist']) => void;
   onDelete: (id: string) => void;
   onEdit: (video: Video) => void;
@@ -82,29 +82,45 @@ export default function DetailModal({
 
         {/* Modal Body */}
         <div className="p-[18px] md:p-5 flex flex-col gap-5 overflow-y-auto flex-1">
-          {/* Status Buttons */}
-          <div className="grid grid-cols-3 gap-2">
-            {(['Pending', 'Scheduled', 'Published'] as VideoStatus[]).map((s) => {
-              let activeStyle = '';
-              if (s === 'Pending') activeStyle = 'bg-[#B4690E] text-white border-transparent';
-              if (s === 'Scheduled') activeStyle = 'bg-[#2557C7] text-white border-transparent';
-              if (s === 'Published') activeStyle = 'bg-[#158A4C] text-white border-transparent';
+          {/* Status Buttons & Date Selector */}
+          <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-3 gap-2">
+              {(['Pending', 'Scheduled', 'Published'] as VideoStatus[]).map((s) => {
+                let activeStyle = '';
+                if (s === 'Pending') activeStyle = 'bg-[#B4690E] text-white border-transparent';
+                if (s === 'Scheduled') activeStyle = 'bg-[#2557C7] text-white border-transparent';
+                if (s === 'Published') activeStyle = 'bg-[#158A4C] text-white border-transparent';
 
-              return (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => onStatusChange(video.id, s)}
-                  className={`py-2 rounded-[10px] border text-xs md:text-[13px] font-bold text-center transition-all font-sans ${
-                    video.status === s
-                      ? activeStyle
-                      : 'bg-gray-50 dark:bg-[#1D212B] text-gray-500 dark:text-[#9AA0AF] border-gray-200 dark:border-[#2A2F3B]'
-                  }`}
-                >
-                  {s}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => onStatusChange(video.id, s)}
+                    className={`py-2 rounded-[10px] border text-xs md:text-[13px] font-bold text-center transition-all font-sans ${
+                      video.status === s
+                        ? activeStyle
+                        : 'bg-gray-50 dark:bg-[#1D212B] text-gray-500 dark:text-[#9AA0AF] border-gray-200 dark:border-[#2A2F3B]'
+                    }`}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
+            </div>
+
+            {(video.status === 'Scheduled' || video.status === 'Published') && (
+              <div className="bg-gray-50 dark:bg-[#1D212B] border border-gray-200 dark:border-[#2A2F3B] p-3 rounded-[12px] flex flex-col gap-1.5 animate-fadeIn">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] font-sans">
+                  {video.status === 'Scheduled' ? 'Select Scheduled Date & Time' : 'Select Published Date & Time'}
+                </label>
+                <input
+                  type="datetime-local"
+                  value={video.scheduledDate ? video.scheduledDate.slice(0, 16) : ''}
+                  onChange={(e) => onStatusChange(video.id, video.status, e.target.value)}
+                  className="w-full px-3 py-2 rounded-[8px] border border-gray-200 dark:border-[#2A2F3B] bg-white dark:bg-[#171A22] text-gray-900 dark:text-[#F0F1F4] text-[13px] focus:outline-none focus:border-[#E11D2E] dark:focus:border-[#FF4655]"
+                />
+              </div>
+            )}
           </div>
 
           {/* Production Checklist */}
