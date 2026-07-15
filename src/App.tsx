@@ -304,24 +304,6 @@ export default function App() {
     }
   };
 
-  const handleUpdateChannelStats = async (id: string, views: number, impressions: number) => {
-    const targetChan = channels.find((c) => c.id === id);
-    if (!targetChan) return;
-
-    const updatedChan: Channel = {
-      ...targetChan,
-      views,
-      impressions,
-    };
-    try {
-      await setDoc(doc(db, 'channels', id), updatedChan);
-      triggerToast(`"${targetChan.name}" ke stats update ho gaye`);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `channels/${id}`);
-      triggerToast('Error: Stats update nahi ho sake');
-    }
-  };
-
   // ---------- Video Actions ----------
   const handleSaveVideo = async (data: {
     channelId: string;
@@ -899,7 +881,6 @@ export default function App() {
         channels={channels}
         onAddChannel={handleAddChannel}
         onDeleteChannel={handleDeleteChannel}
-        onUpdateChannelStats={handleUpdateChannelStats}
       />
 
       {/* MODAL 2: Create / Edit Video Details */}
