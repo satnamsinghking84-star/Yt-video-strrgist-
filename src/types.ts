@@ -29,6 +29,7 @@ export interface Video {
   checklist: Checklist;
   createdAt: string;
   updatedAt: string;
+  contentType?: 'Video' | 'Post';
 }
 
 export interface Idea {

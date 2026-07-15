@@ -266,20 +266,22 @@ export default function App() {
     voiceNotes: string;
     status: VideoStatus;
     scheduledDate: string;
+    contentType?: 'Video' | 'Post';
   }) => {
     if (focusedVideo) {
       // Edit mode
       const updatedVideo: Video = {
         ...focusedVideo,
         ...data,
+        contentType: data.contentType || focusedVideo.contentType || 'Video',
         updatedAt: new Date().toISOString(),
       };
       try {
         await setDoc(doc(db, 'videos', updatedVideo.id), updatedVideo);
-        triggerToast('Video details update kar di gayi');
+        triggerToast(data.contentType === 'Post' ? 'Post details update kar di gayi' : 'Video details update kar di gayi');
       } catch (error) {
         handleFirestoreError(error, OperationType.UPDATE, `videos/${updatedVideo.id}`);
-        triggerToast('Error: Video update nahi ho saka');
+        triggerToast(data.contentType === 'Post' ? 'Error: Post update nahi ho saki' : 'Error: Video update nahi ho saka');
       }
       setFocusedVideo(null);
     } else {
@@ -293,6 +295,7 @@ export default function App() {
         voiceNotes: data.voiceNotes,
         status: data.status,
         scheduledDate: data.scheduledDate,
+        contentType: data.contentType || 'Video',
         checklist: {
           thumbnail: false,
           title: false,
@@ -306,10 +309,10 @@ export default function App() {
       };
       try {
         await setDoc(doc(db, 'videos', newVideo.id), newVideo);
-        triggerToast('Naya video pipeline me add kiya gaya');
+        triggerToast(data.contentType === 'Post' ? 'Nayi post pipeline me add ki gayi' : 'Naya video pipeline me add kiya gaya');
       } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, `videos/${newVideo.id}`);
-        triggerToast('Error: Video add nahi ho saka');
+        triggerToast(data.contentType === 'Post' ? 'Error: Post add nahi ho saki' : 'Error: Video add nahi ho saka');
       }
     }
     setIsVideoModalOpen(false);
@@ -863,13 +866,22 @@ function VideoCard({ video, channels, onClick, onChecklistToggle, onStatusChange
       className="bg-white dark:bg-[#171A22] border border-gray-200 dark:border-[#2A2F3B] hover:border-gray-300 dark:hover:border-[#4B5366] rounded-[16px] p-4 shadow-2xs hover:shadow-xs transition-all duration-150 cursor-pointer group flex flex-col gap-3"
     >
       {/* Card Channel and Action */}
-      <div className="flex justify-between items-center">
-        <span
-          className="text-[9px] font-extrabold text-white uppercase tracking-wider px-2 py-0.5 rounded-full truncate max-w-[150px] font-sans"
-          style={{ backgroundColor: chanColor }}
-        >
-          {chanName}
-        </span>
+      <div className="flex justify-between items-center gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span
+            className="text-[9px] font-extrabold text-white uppercase tracking-wider px-2 py-0.5 rounded-full truncate max-w-[130px] font-sans"
+            style={{ backgroundColor: chanColor }}
+          >
+            {chanName}
+          </span>
+          <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-[5px] flex items-center gap-1 border ${
+            video.contentType === 'Post'
+              ? 'bg-[#E11D2E]/10 text-[#E11D2E] dark:text-[#FF4655] border-[#E11D2E]/15'
+              : 'bg-[#2557C7]/10 text-[#2557C7] dark:text-[#6C9CFF] border-[#2557C7]/15'
+          }`}>
+            {video.contentType === 'Post' ? 'Post' : 'Video'}
+          </span>
+        </div>
 
         {video.status !== 'Published' && (
           <button

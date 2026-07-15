@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Video as VideoIcon, FileText } from 'lucide-react';
 import { Channel, Video, VideoStatus } from '../types';
 
 interface VideoModalProps {
   isOpen: boolean;
   onClose: () => void;
   channels: Channel[];
-  video: Video | null; // If null, we are creating a new video. If present, we are editing.
+  video: Video | null; // If null, we are creating a new video/post. If present, we are editing.
   onSave: (data: {
     channelId: string;
     title: string;
@@ -15,6 +15,7 @@ interface VideoModalProps {
     voiceNotes: string;
     status: VideoStatus;
     scheduledDate: string;
+    contentType: 'Video' | 'Post';
   }) => void;
   initialTitle?: string; // Prepopulated from Ideas conversion
   initialChannelId?: string; // Prepopulated from Ideas conversion
@@ -36,6 +37,7 @@ export default function VideoModal({
   const [voiceNotes, setVoiceNotes] = useState('');
   const [status, setStatus] = useState<VideoStatus>('Pending');
   const [scheduledDate, setScheduledDate] = useState('');
+  const [contentType, setContentType] = useState<'Video' | 'Post'>('Video');
   const [error, setError] = useState('');
 
   // Sync state with active video or initial values
@@ -49,6 +51,7 @@ export default function VideoModal({
         setVoiceNotes(video.voiceNotes);
         setStatus(video.status);
         setScheduledDate(video.scheduledDate ? video.scheduledDate.slice(0, 16) : '');
+        setContentType(video.contentType || 'Video');
         setError('');
       } else {
         setChannelId(initialChannelId || (channels[0]?.id || ''));
@@ -58,6 +61,7 @@ export default function VideoModal({
         setVoiceNotes('');
         setStatus('Pending');
         setScheduledDate('');
+        setContentType('Video');
         setError('');
       }
     }
@@ -72,7 +76,7 @@ export default function VideoModal({
       return;
     }
     if (!title.trim()) {
-      setError('Title dalein');
+      setError(contentType === 'Post' ? 'Post ka title/caption dalein' : 'Title dalein');
       return;
     }
     if (status === 'Scheduled' && !scheduledDate) {
@@ -88,6 +92,7 @@ export default function VideoModal({
       voiceNotes: voiceNotes.trim(),
       status,
       scheduledDate: status === 'Scheduled' ? scheduledDate : '',
+      contentType,
     });
   };
 
@@ -99,9 +104,14 @@ export default function VideoModal({
         <div className="flex justify-between items-start p-[18px] md:p-5 border-b border-gray-200 dark:border-[#2A2F3B] sticky top-0 bg-white dark:bg-[#171A22] z-10">
           <div>
             <h3 className="text-base font-bold text-gray-900 dark:text-[#F0F1F4] font-display">
-              {video ? 'Video Details Edit Karein' : 'Naya Video Jodein'}
+              {video 
+                ? (contentType === 'Post' ? 'Post Details Edit Karein' : 'Video Details Edit Karein')
+                : (contentType === 'Post' ? 'Nayi Post Jodein' : 'Naya Video Jodein')
+              }
             </h3>
-            <p className="text-[11.5px] text-gray-500 dark:text-[#9AA0AF] mt-0.5 font-sans">Video ki details bharein</p>
+            <p className="text-[11.5px] text-gray-500 dark:text-[#9AA0AF] mt-0.5 font-sans">
+              {contentType === 'Post' ? 'Community post ki details bharein' : 'Video ki details bharein'}
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -131,15 +141,48 @@ export default function VideoModal({
             </select>
           </div>
 
+          {/* Post or Video Content Type Selection */}
           <div className="field">
             <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
-              Title
+              Content Type (Kya banana hai?)
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setContentType('Video')}
+                className={`py-2.5 px-4 rounded-[11px] border flex items-center justify-center gap-2 text-[13px] font-bold transition-all ${
+                  contentType === 'Video'
+                    ? 'bg-[#E11D2E] text-white border-transparent shadow-sm'
+                    : 'bg-gray-50 dark:bg-[#1D212B] text-gray-600 dark:text-[#9AA0AF] border-gray-200 dark:border-[#2A2F3B] hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+              >
+                <VideoIcon className="w-4 h-4" />
+                <span>Video</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setContentType('Post')}
+                className={`py-2.5 px-4 rounded-[11px] border flex items-center justify-center gap-2 text-[13px] font-bold transition-all ${
+                  contentType === 'Post'
+                    ? 'bg-[#E11D2E] text-white border-transparent shadow-sm'
+                    : 'bg-gray-50 dark:bg-[#1D212B] text-gray-600 dark:text-[#9AA0AF] border-gray-200 dark:border-[#2A2F3B] hover:bg-gray-100 dark:hover:bg-gray-800'
+                }`}
+              >
+                <FileText className="w-4 h-4" />
+                <span>Community Post</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="field">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
+              {contentType === 'Post' ? 'Post Title / Topic' : 'Title'}
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Video ka title"
+              placeholder={contentType === 'Post' ? 'Community post ka topic ya title' : 'Video ka title'}
               className="w-full px-3 py-2.5 rounded-[10px] border border-gray-200 dark:border-[#2A2F3B] bg-gray-50 dark:bg-[#1D212B] text-gray-900 dark:text-[#F0F1F4] text-[13.5px] focus:outline-none focus:border-[#E11D2E] dark:focus:border-[#FF4655]"
               required
             />

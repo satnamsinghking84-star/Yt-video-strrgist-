@@ -52,14 +52,23 @@ export default function DetailModal({
         
         {/* Modal Head */}
         <div className="flex justify-between items-start p-[18px] md:p-5 border-b border-gray-200 dark:border-[#2A2F3B] sticky top-0 bg-white dark:bg-[#171A22] z-10">
-          <div>
-            <span
-              className="text-[9.5px] font-extrabold text-white uppercase tracking-wider px-2.5 py-1 rounded-full text-center inline-block"
-              style={{ backgroundColor: chanColor }}
-            >
-              {chanName}
-            </span>
-            <h3 id="detailTitle" className="text-[17px] font-bold text-gray-900 dark:text-[#F0F1F4] mt-2.5 font-display leading-snug">
+          <div className="flex flex-col gap-1.5 items-start">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span
+                className="text-[9.5px] font-extrabold text-white uppercase tracking-wider px-2.5 py-1 rounded-full text-center inline-block"
+                style={{ backgroundColor: chanColor }}
+              >
+                {chanName}
+              </span>
+              <span className={`text-[9.5px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-[5px] inline-block border ${
+                video.contentType === 'Post'
+                  ? 'bg-[#E11D2E]/10 text-[#E11D2E] dark:text-[#FF4655] border-[#E11D2E]/15'
+                  : 'bg-[#2557C7]/10 text-[#2557C7] dark:text-[#6C9CFF] border-[#2557C7]/15'
+              }`}>
+                {video.contentType === 'Post' ? 'Post' : 'Video'}
+              </span>
+            </div>
+            <h3 id="detailTitle" className="text-[17px] font-bold text-gray-900 dark:text-[#F0F1F4] mt-1 font-display leading-snug">
               {video.title}
             </h3>
           </div>

@@ -128,6 +128,9 @@ export default function CalendarView({ videos, channels, onSelectVideo }: Calend
                         className="text-left w-full truncate text-[8.5px] md:text-[10px] px-1 py-0.5 rounded-sm font-bold text-white transition-opacity hover:opacity-90 flex items-center gap-0.5 font-sans"
                         style={{ backgroundColor: chan?.color || '#8A93A6' }}
                       >
+                        <span className="opacity-95 text-[7.5px] font-mono mr-0.5 bg-black/20 px-0.5 rounded">
+                          {v.contentType === 'Post' ? 'P' : 'V'}
+                        </span>
                         {v.title}
                       </button>
                     );
@@ -179,8 +182,15 @@ export default function CalendarView({ videos, channels, onSelectVideo }: Calend
                     <div className="flex items-center gap-2.5 min-w-0">
                       <span className="w-1.5 h-7 rounded-full flex-shrink-0" style={{ backgroundColor: chan?.color || '#8A93A6' }} />
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-gray-900 dark:text-[#F0F1F4] truncate font-sans">
-                          {v.title}
+                        <p className="text-xs font-bold text-gray-900 dark:text-[#F0F1F4] truncate font-sans flex items-center gap-1.5">
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider font-extrabold border ${
+                            v.contentType === 'Post'
+                              ? 'bg-[#E11D2E]/10 text-[#E11D2E] border-[#E11D2E]/15'
+                              : 'bg-[#2557C7]/10 text-[#2557C7] border-[#2557C7]/15'
+                          }`}>
+                            {v.contentType === 'Post' ? 'Post' : 'Video'}
+                          </span>
+                          <span>{v.title}</span>
                         </p>
                         <p className="text-[10px] text-gray-400 dark:text-[#6A7180] font-sans">
                           {chan?.name || 'Unknown Channel'}
