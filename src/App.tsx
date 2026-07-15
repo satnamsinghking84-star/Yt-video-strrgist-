@@ -28,7 +28,7 @@ import VideoModal from './components/VideoModal';
 import DetailModal from './components/DetailModal';
 import CalendarView from './components/CalendarView';
 import IdeasView from './components/IdeasView';
-import { onSnapshot, collection, doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { onSnapshot, collection, doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from './lib/firebase';
 
 // Preset Seeding
@@ -139,9 +139,19 @@ export default function App() {
       async (snapshot) => {
         if (snapshot.empty) {
           try {
+            const metaRef = doc(db, 'system', 'metadata');
+            const metaSnap = await getDoc(metaRef);
+            if (metaSnap.exists() && metaSnap.data()?.seeded) {
+              setChannels([]);
+              setLoadingCloud(false);
+              return;
+            }
+
             for (const ch of INITIAL_CHANNELS) {
               await setDoc(doc(db, 'channels', ch.id), ch);
             }
+            await setDoc(metaRef, { seeded: true });
+            localStorage.setItem('creator_seeded', 'true');
           } catch (e) {
             console.error('Seeding channels failed:', e);
           }
@@ -164,9 +174,18 @@ export default function App() {
       async (snapshot) => {
         if (snapshot.empty) {
           try {
+            const metaRef = doc(db, 'system', 'metadata');
+            const metaSnap = await getDoc(metaRef);
+            if (metaSnap.exists() && metaSnap.data()?.seeded) {
+              setVideos([]);
+              return;
+            }
+
             for (const vid of INITIAL_VIDEOS) {
               await setDoc(doc(db, 'videos', vid.id), vid);
             }
+            await setDoc(metaRef, { seeded: true });
+            localStorage.setItem('creator_seeded', 'true');
           } catch (e) {
             console.error('Seeding videos failed:', e);
           }
@@ -188,9 +207,18 @@ export default function App() {
       async (snapshot) => {
         if (snapshot.empty) {
           try {
+            const metaRef = doc(db, 'system', 'metadata');
+            const metaSnap = await getDoc(metaRef);
+            if (metaSnap.exists() && metaSnap.data()?.seeded) {
+              setIdeas([]);
+              return;
+            }
+
             for (const idea of INITIAL_IDEAS) {
               await setDoc(doc(db, 'ideas', idea.id), idea);
             }
+            await setDoc(metaRef, { seeded: true });
+            localStorage.setItem('creator_seeded', 'true');
           } catch (e) {
             console.error('Seeding ideas failed:', e);
           }
