@@ -16,11 +16,7 @@ import {
   ArrowRight,
   Download,
   Upload,
-  LogIn,
-  LogOut,
   Cloud,
-  CloudOff,
-  RefreshCw,
 } from 'lucide-react';
 import { Channel, Video, VideoStatus, Idea } from './types';
 import StatsSection from './components/StatsSection';
@@ -30,8 +26,7 @@ import DetailModal from './components/DetailModal';
 import CalendarView from './components/CalendarView';
 import IdeasView from './components/IdeasView';
 import { onSnapshot, collection, doc, setDoc, deleteDoc } from 'firebase/firestore';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { db, auth, loginWithGoogle, logoutUser, handleFirestoreError, OperationType } from './lib/firebase';
+import { db, handleFirestoreError, OperationType } from './lib/firebase';
 
 // Preset Seeding
 const INITIAL_CHANNELS: Channel[] = [
@@ -110,7 +105,6 @@ export default function App() {
   });
 
   // Firebase integration states
-  const [user, setUser] = useState<User | null>(null);
   const [loadingCloud, setLoadingCloud] = useState<boolean>(false);
 
   // Filters & Tabs
@@ -133,58 +127,26 @@ export default function App() {
   // Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // ---------- Sync to LocalStorage ----------
+  // ---------- Firebase Firestore Realtime Sync & Auto-Seeding ----------
   useEffect(() => {
-    if (!user) {
-      localStorage.setItem('creator_channels', JSON.stringify(channels));
-    }
-  }, [channels, user]);
-
-  useEffect(() => {
-    if (!user) {
-      localStorage.setItem('creator_videos', JSON.stringify(videos));
-    }
-  }, [videos, user]);
-
-  useEffect(() => {
-    if (!user) {
-      localStorage.setItem('creator_ideas', JSON.stringify(ideas));
-    }
-  }, [ideas, user]);
-
-  // ---------- Firebase Auth Listener ----------
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser);
-      if (firebaseUser) {
-        setLoadingCloud(true);
-      } else {
-        setLoadingCloud(false);
-        const savedChannels = localStorage.getItem('creator_channels');
-        const savedVideos = localStorage.getItem('creator_videos');
-        const savedIdeas = localStorage.getItem('creator_ideas');
-        setChannels(savedChannels ? JSON.parse(savedChannels) : INITIAL_CHANNELS);
-        setVideos(savedVideos ? JSON.parse(savedVideos) : INITIAL_VIDEOS);
-        setIdeas(savedIdeas ? JSON.parse(savedIdeas) : INITIAL_IDEAS);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // ---------- Firebase Firestore Realtime Sync ----------
-  useEffect(() => {
-    if (!user) return;
-
     setLoadingCloud(true);
 
     const unsubChannels = onSnapshot(
       collection(db, 'channels'),
-      (snapshot) => {
-        const list: Channel[] = [];
-        snapshot.forEach((doc) => {
-          list.push(doc.data() as Channel);
-        });
-        if (list.length > 0) {
+      async (snapshot) => {
+        if (snapshot.empty) {
+          try {
+            for (const ch of INITIAL_CHANNELS) {
+              await setDoc(doc(db, 'channels', ch.id), ch);
+            }
+          } catch (e) {
+            console.error('Seeding channels failed:', e);
+          }
+        } else {
+          const list: Channel[] = [];
+          snapshot.forEach((doc) => {
+            list.push(doc.data() as Channel);
+          });
           setChannels(list);
         }
         setLoadingCloud(false);
@@ -196,12 +158,22 @@ export default function App() {
 
     const unsubVideos = onSnapshot(
       collection(db, 'videos'),
-      (snapshot) => {
-        const list: Video[] = [];
-        snapshot.forEach((doc) => {
-          list.push(doc.data() as Video);
-        });
-        setVideos(list);
+      async (snapshot) => {
+        if (snapshot.empty) {
+          try {
+            for (const vid of INITIAL_VIDEOS) {
+              await setDoc(doc(db, 'videos', vid.id), vid);
+            }
+          } catch (e) {
+            console.error('Seeding videos failed:', e);
+          }
+        } else {
+          const list: Video[] = [];
+          snapshot.forEach((doc) => {
+            list.push(doc.data() as Video);
+          });
+          setVideos(list);
+        }
       },
       (error) => {
         handleFirestoreError(error, OperationType.LIST, 'videos');
@@ -210,12 +182,22 @@ export default function App() {
 
     const unsubIdeas = onSnapshot(
       collection(db, 'ideas'),
-      (snapshot) => {
-        const list: Idea[] = [];
-        snapshot.forEach((doc) => {
-          list.push(doc.data() as Idea);
-        });
-        setIdeas(list);
+      async (snapshot) => {
+        if (snapshot.empty) {
+          try {
+            for (const idea of INITIAL_IDEAS) {
+              await setDoc(doc(db, 'ideas', idea.id), idea);
+            }
+          } catch (e) {
+            console.error('Seeding ideas failed:', e);
+          }
+        } else {
+          const list: Idea[] = [];
+          snapshot.forEach((doc) => {
+            list.push(doc.data() as Idea);
+          });
+          setIdeas(list);
+        }
       },
       (error) => {
         handleFirestoreError(error, OperationType.LIST, 'ideas');
@@ -227,28 +209,7 @@ export default function App() {
       unsubVideos();
       unsubIdeas();
     };
-  }, [user]);
-
-  // ---------- Upload Local data to Cloud ----------
-  const handleUploadLocalToCloud = async () => {
-    if (!user) return;
-    try {
-      triggerToast('Cloud sync shuru ho raha hai...');
-      for (const ch of channels) {
-        await setDoc(doc(db, 'channels', ch.id), ch);
-      }
-      for (const vid of videos) {
-        await setDoc(doc(db, 'videos', vid.id), vid);
-      }
-      for (const idea of ideas) {
-        await setDoc(doc(db, 'ideas', idea.id), idea);
-      }
-      triggerToast('Aapka data Google Cloud Firestore me save ho gaya!');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'bulk-upload');
-      triggerToast('Cloud upload me koi error aaya');
-    }
-  };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('creator_theme', isDarkMode ? 'dark' : 'light');
@@ -276,32 +237,22 @@ export default function App() {
       color,
       createdAt: new Date().toISOString(),
     };
-    if (user) {
-      try {
-        await setDoc(doc(db, 'channels', newChan.id), newChan);
-        triggerToast(`"${name}" channel add kiya gaya`);
-      } catch (error) {
-        handleFirestoreError(error, OperationType.CREATE, `channels/${newChan.id}`);
-        triggerToast('Error: Channel add nahi ho saka');
-      }
-    } else {
-      setChannels((prev) => [...prev, newChan]);
-      triggerToast(`"${name}" channel add kiya gaya (Local Mode)`);
+    try {
+      await setDoc(doc(db, 'channels', newChan.id), newChan);
+      triggerToast(`"${name}" channel add kiya gaya`);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `channels/${newChan.id}`);
+      triggerToast('Error: Channel add nahi ho saka');
     }
   };
 
   const handleDeleteChannel = async (id: string) => {
-    if (user) {
-      try {
-        await deleteDoc(doc(db, 'channels', id));
-        triggerToast('Channel hataya gaya');
-      } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, `channels/${id}`);
-        triggerToast('Error: Channel delete nahi ho saka');
-      }
-    } else {
-      setChannels((prev) => prev.filter((c) => c.id !== id));
+    try {
+      await deleteDoc(doc(db, 'channels', id));
       triggerToast('Channel hataya gaya');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `channels/${id}`);
+      triggerToast('Error: Channel delete nahi ho saka');
     }
   };
 
@@ -322,19 +273,12 @@ export default function App() {
         ...data,
         updatedAt: new Date().toISOString(),
       };
-      if (user) {
-        try {
-          await setDoc(doc(db, 'videos', updatedVideo.id), updatedVideo);
-          triggerToast('Video details update kar di gayi');
-        } catch (error) {
-          handleFirestoreError(error, OperationType.UPDATE, `videos/${updatedVideo.id}`);
-          triggerToast('Error: Video update nahi ho saka');
-        }
-      } else {
-        setVideos((prev) =>
-          prev.map((v) => (v.id === focusedVideo.id ? updatedVideo : v))
-        );
+      try {
+        await setDoc(doc(db, 'videos', updatedVideo.id), updatedVideo);
         triggerToast('Video details update kar di gayi');
+      } catch (error) {
+        handleFirestoreError(error, OperationType.UPDATE, `videos/${updatedVideo.id}`);
+        triggerToast('Error: Video update nahi ho saka');
       }
       setFocusedVideo(null);
     } else {
@@ -359,17 +303,12 @@ export default function App() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      if (user) {
-        try {
-          await setDoc(doc(db, 'videos', newVideo.id), newVideo);
-          triggerToast('Naya video pipeline me add kiya gaya');
-        } catch (error) {
-          handleFirestoreError(error, OperationType.CREATE, `videos/${newVideo.id}`);
-          triggerToast('Error: Video add nahi ho saka');
-        }
-      } else {
-        setVideos((prev) => [newVideo, ...prev]);
+      try {
+        await setDoc(doc(db, 'videos', newVideo.id), newVideo);
         triggerToast('Naya video pipeline me add kiya gaya');
+      } catch (error) {
+        handleFirestoreError(error, OperationType.CREATE, `videos/${newVideo.id}`);
+        triggerToast('Error: Video add nahi ho saka');
       }
     }
     setIsVideoModalOpen(false);
@@ -378,19 +317,13 @@ export default function App() {
   };
 
   const handleDeleteVideo = async (id: string) => {
-    if (user) {
-      try {
-        await deleteDoc(doc(db, 'videos', id));
-        setIsDetailModalOpen(false);
-        triggerToast('Video delete ho gaya');
-      } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, `videos/${id}`);
-        triggerToast('Error: Video delete nahi ho saka');
-      }
-    } else {
-      setVideos((prev) => prev.filter((v) => v.id !== id));
+    try {
+      await deleteDoc(doc(db, 'videos', id));
       setIsDetailModalOpen(false);
       triggerToast('Video delete ho gaya');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `videos/${id}`);
+      triggerToast('Error: Video delete nahi ho saka');
     }
   };
 
@@ -405,19 +338,12 @@ export default function App() {
       updatedAt: new Date().toISOString(),
     };
 
-    if (user) {
-      try {
-        await setDoc(doc(db, 'videos', id), updatedVideo);
-        triggerToast(`Status badal kar "${newStatus}" kiya gaya`);
-      } catch (error) {
-        handleFirestoreError(error, OperationType.UPDATE, `videos/${id}`);
-        triggerToast('Error: Status update nahi ho saka');
-      }
-    } else {
-      setVideos((prev) =>
-        prev.map((v) => (v.id === id ? updatedVideo : v))
-      );
+    try {
+      await setDoc(doc(db, 'videos', id), updatedVideo);
       triggerToast(`Status badal kar "${newStatus}" kiya gaya`);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `videos/${id}`);
+      triggerToast('Error: Status update nahi ho saka');
     }
 
     // Sync focused video if open
@@ -439,17 +365,11 @@ export default function App() {
       updatedAt: new Date().toISOString(),
     };
 
-    if (user) {
-      try {
-        await setDoc(doc(db, 'videos', id), updatedVideo);
-      } catch (error) {
-        handleFirestoreError(error, OperationType.UPDATE, `videos/${id}`);
-        triggerToast('Error: Checklist update nahi ho saki');
-      }
-    } else {
-      setVideos((prev) =>
-        prev.map((v) => (v.id === id ? updatedVideo : v))
-      );
+    try {
+      await setDoc(doc(db, 'videos', id), updatedVideo);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `videos/${id}`);
+      triggerToast('Error: Checklist update nahi ho saki');
     }
 
     // Sync focused video if open
@@ -466,32 +386,22 @@ export default function App() {
       channelId,
       createdAt: new Date().toISOString(),
     };
-    if (user) {
-      try {
-        await setDoc(doc(db, 'ideas', newIdea.id), newIdea);
-        triggerToast('Idea Scratchpad me save ho gaya');
-      } catch (error) {
-        handleFirestoreError(error, OperationType.CREATE, `ideas/${newIdea.id}`);
-        triggerToast('Error: Idea save nahi ho saka');
-      }
-    } else {
-      setIdeas((prev) => [newIdea, ...prev]);
+    try {
+      await setDoc(doc(db, 'ideas', newIdea.id), newIdea);
       triggerToast('Idea Scratchpad me save ho gaya');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `ideas/${newIdea.id}`);
+      triggerToast('Error: Idea save nahi ho saka');
     }
   };
 
   const handleDeleteIdea = async (id: string) => {
-    if (user) {
-      try {
-        await deleteDoc(doc(db, 'ideas', id));
-        triggerToast('Idea delete ho gaya');
-      } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, `ideas/${id}`);
-        triggerToast('Error: Idea delete nahi ho saka');
-      }
-    } else {
-      setIdeas((prev) => prev.filter((i) => i.id !== id));
+    try {
+      await deleteDoc(doc(db, 'ideas', id));
       triggerToast('Idea delete ho gaya');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `ideas/${id}`);
+      triggerToast('Error: Idea delete nahi ho saka');
     }
   };
 
@@ -501,14 +411,10 @@ export default function App() {
     setFocusedVideo(null); // explicitly reset focused video (we are creating)
     setIsVideoModalOpen(true);
     // Delete idea once processed
-    if (user) {
-      try {
-        await deleteDoc(doc(db, 'ideas', idea.id));
-      } catch (error) {
-        handleFirestoreError(error, OperationType.DELETE, `ideas/${idea.id}`);
-      }
-    } else {
-      setIdeas((prev) => prev.filter((i) => i.id !== idea.id));
+    try {
+      await deleteDoc(doc(db, 'ideas', idea.id));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, `ideas/${idea.id}`);
     }
   };
 
@@ -541,24 +447,17 @@ export default function App() {
       try {
         const data = JSON.parse(event.target?.result as string);
         if (data.channels && data.videos && data.ideas) {
-          if (user) {
-            triggerToast('Backup database me sync ho raha hai...');
-            for (const ch of data.channels) {
-              await setDoc(doc(db, 'channels', ch.id), ch);
-            }
-            for (const vid of data.videos) {
-              await setDoc(doc(db, 'videos', vid.id), vid);
-            }
-            for (const idea of data.ideas) {
-              await setDoc(doc(db, 'ideas', idea.id), idea);
-            }
-            triggerToast('Backup Cloud me restore ho gaya!');
-          } else {
-            setChannels(data.channels);
-            setVideos(data.videos);
-            setIdeas(data.ideas);
-            triggerToast('Backup local me restore ho gaya!');
+          triggerToast('Backup database me sync ho raha hai...');
+          for (const ch of data.channels) {
+            await setDoc(doc(db, 'channels', ch.id), ch);
           }
+          for (const vid of data.videos) {
+            await setDoc(doc(db, 'videos', vid.id), vid);
+          }
+          for (const idea of data.ideas) {
+            await setDoc(doc(db, 'ideas', idea.id), idea);
+          }
+          triggerToast('Backup Cloud me restore ho gaya!');
         } else {
           triggerToast('Error: Backup format invalid hai');
         }
@@ -602,16 +501,22 @@ export default function App() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h1 id="appTitle" className="text-base font-extrabold text-gray-900 dark:text-white leading-none tracking-tight font-display">
-                Creator Hisaab
-              </h1>
-              <span className="text-[10px] font-bold text-gray-400 dark:text-[#6A7180] tracking-wider uppercase font-sans">
+              <div className="flex items-center gap-2">
+                <h1 id="appTitle" className="text-base font-extrabold text-gray-900 dark:text-white leading-none tracking-tight font-display">
+                  Creator Hisaab
+                </h1>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-[#158A4C]/10 text-[#158A4C] dark:text-[#3ED586] border border-[#158A4C]/15 select-none animate-pulse">
+                  <Cloud className="w-3 h-3" />
+                  <span>Cloud Active</span>
+                </span>
+              </div>
+              <span className="text-[10px] font-bold text-gray-400 dark:text-[#6A7180] tracking-wider uppercase font-sans mt-0.5 block">
                 Video Pipeline Hub
               </span>
             </div>
           </div>
 
-          {/* Quick Actions (Theme, Backup, Channels, New Video) */}
+          {/* Quick Actions (Theme, Backup, Channels) */}
           <div className="flex items-center gap-2 md:gap-3">
             
             {/* Backup Exporter */}
@@ -650,81 +555,12 @@ export default function App() {
               <Tv className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Channels ({channels.length})</span>
             </button>
-
-            {/* Naya Video button */}
-            <button
-              onClick={() => {
-                setFocusedVideo(null);
-                setInitialTitle('');
-                setInitialChannelId('');
-                setIsVideoModalOpen(true);
-              }}
-              className="px-3.5 py-2 bg-[#E11D2E] dark:bg-[#FF4655] hover:brightness-110 active:scale-95 text-white dark:text-[#0E1015] font-bold text-xs md:text-[13px] rounded-[10px] transition-all flex items-center gap-1.5 shadow-xs"
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Video</span>
-            </button>
           </div>
         </div>
       </header>
 
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 md:px-6 mt-6">
-
-        {/* Cloud Sync Controller Banner */}
-        <div className="bg-white dark:bg-[#171A22] border border-gray-200 dark:border-[#2A2F3B] rounded-[18px] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 transition-colors duration-150">
-          <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-[12px] flex items-center justify-center ${user ? 'bg-[#158A4C]/10 text-[#158A4C] dark:text-[#3ED586]' : 'bg-gray-100 dark:bg-[#1D212B] text-gray-400 dark:text-[#6A7180]'}`}>
-              {user ? <Cloud className="w-5 h-5 animate-pulse" /> : <CloudOff className="w-5 h-5" />}
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-sm font-bold text-gray-900 dark:text-white leading-none">
-                  {user ? 'Google Cloud Sync Active' : 'Local Storage Mode'}
-                </h2>
-                <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-extrabold uppercase tracking-wider leading-none ${user ? 'bg-[#158A4C]/10 text-[#158A4C] dark:text-[#3ED586]' : 'bg-gray-100 dark:bg-[#1D212B] text-gray-500'}`}>
-                  {user ? 'Cloud Live' : 'Offline Mode'}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-[#9AA0AF] mt-1">
-                {user 
-                  ? `Logged in as ${user.displayName || user.email}. Sabhi changes Google Firebase me real-time save ho rahe hain!`
-                  : 'Aapka data local browser me save ho raha hai. Kisi bhi device se data access karne ke liye Cloud me save karein.'
-                }
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2.5 self-end sm:self-auto">
-            {user ? (
-              <>
-                <button
-                  onClick={handleUploadLocalToCloud}
-                  className="px-3 py-1.5 text-xs font-bold border border-gray-200 dark:border-[#2A2F3B] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-[10px] text-gray-700 dark:text-[#9AA0AF] transition-all flex items-center gap-1.5 cursor-pointer"
-                  title="Aapka local storage data Cloud me upload karein"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Upload Local Data</span>
-                </button>
-                <button
-                  onClick={logoutUser}
-                  className="px-3.5 py-1.5 bg-gray-100 dark:bg-[#1D212B] hover:bg-gray-200 dark:hover:bg-[#2A2F3B] text-gray-700 dark:text-[#9AA0AF] font-bold text-xs md:text-[13px] rounded-[10px] transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Sign Out</span>
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={loginWithGoogle}
-                className="px-4 py-2 bg-[#4285F4] hover:bg-[#357AE8] text-white font-bold text-xs md:text-[13px] rounded-[10px] transition-all flex items-center gap-2 shadow-sm cursor-pointer"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Sign in with Google</span>
-              </button>
-            )}
-          </div>
-        </div>
         
         {/* Pipeline Summary Counters */}
         <StatsSection videos={videos} />
@@ -755,9 +591,23 @@ export default function App() {
             })}
           </div>
 
-          {/* Search & Channel Selector */}
-          <div className="flex flex-col sm:flex-row gap-3">
+          {/* Search & Channel Selector & New Video */}
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full md:w-auto">
             
+            {/* New Video Button */}
+            <button
+              onClick={() => {
+                setFocusedVideo(null);
+                setInitialTitle('');
+                setInitialChannelId('');
+                setIsVideoModalOpen(true);
+              }}
+              className="px-4 py-2 bg-[#E11D2E] dark:bg-[#FF4655] hover:brightness-110 active:scale-95 text-white dark:text-[#0E1015] font-bold text-xs md:text-[13px] rounded-[10px] transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>New Video</span>
+            </button>
+
             {/* Channel filter */}
             <select
               value={selectedChannelFilter}

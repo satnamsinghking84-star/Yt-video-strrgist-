@@ -7,79 +7,19 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Reusable, hardened security helpers
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isVerified() {
-      return isSignedIn() && request.auth.token.email_verified == true;
-    }
-
-    function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
-
-    function incoming() {
-      return request.resource.data;
-    }
-
-    function existing() {
-      return resource.data;
-    }
-
-    // Entity-level validation helpers
-    function isValidChannel(data) {
-      return data.keys().hasAll(['id', 'name', 'handle', 'color', 'createdAt'])
-        && data.keys().size() == 5
-        && data.id is string && data.id.size() <= 128
-        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
-        && data.handle is string && data.handle.size() > 0 && data.handle.size() <= 100
-        && data.color is string && data.color.size() >= 4 && data.color.size() <= 20
-        && data.createdAt is string && data.createdAt.size() <= 50;
-    }
-
-    function isValidVideo(data) {
-      return data.keys().hasAll(['id', 'channelId', 'title', 'status', 'checklist', 'createdAt', 'updatedAt'])
-        && data.keys().size() >= 7 && data.keys().size() <= 11
-        && data.id is string && data.id.size() <= 128
-        && data.channelId is string && data.channelId.size() <= 128
-        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
-        && data.status is string && (data.status == 'Pending' || data.status == 'Scheduled' || data.status == 'Published')
-        && data.checklist is map
-        && data.createdAt is string && data.createdAt.size() <= 50
-        && data.updatedAt is string && data.updatedAt.size() <= 50;
-    }
-
-    function isValidIdea(data) {
-      return data.keys().hasAll(['id', 'text', 'channelId', 'createdAt'])
-        && data.keys().size() == 4
-        && data.id is string && data.id.size() <= 128
-        && data.text is string && data.text.size() > 0 && data.text.size() <= 500
-        && data.channelId is string && data.channelId.size() <= 128
-        && data.createdAt is string && data.createdAt.size() <= 50;
-    }
-
-    // Match blocks for collections
+    // Allow public read/write for channels
     match /channels/{channelId} {
-      allow read: if isVerified();
-      allow create: if isVerified() && isValidId(channelId) && isValidChannel(incoming());
-      allow update: if isVerified() && isValidChannel(incoming()) && incoming().createdAt == existing().createdAt;
-      allow delete: if isVerified();
+      allow read, write: if true;
     }
 
+    // Allow public read/write for videos
     match /videos/{videoId} {
-      allow read: if isVerified();
-      allow create: if isVerified() && isValidId(videoId) && isValidVideo(incoming()) && exists(/databases/$(database)/documents/channels/$(incoming().channelId));
-      allow update: if isVerified() && isValidVideo(incoming()) && incoming().createdAt == existing().createdAt;
-      allow delete: if isVerified();
+      allow read, write: if true;
     }
 
+    // Allow public read/write for ideas
     match /ideas/{ideaId} {
-      allow read: if isVerified();
-      allow create: if isVerified() && isValidId(ideaId) && isValidIdea(incoming()) && exists(/databases/$(database)/documents/channels/$(incoming().channelId));
-      allow update: if isVerified() && isValidIdea(incoming()) && incoming().createdAt == existing().createdAt;
-      allow delete: if isVerified();
+      allow read, write: if true;
     }
   }
 }
