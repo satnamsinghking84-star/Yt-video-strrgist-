@@ -4,6 +4,8 @@ export interface Channel {
   handle: string;
   color: string;
   createdAt: string;
+  views?: number;
+  impressions?: number;
 }
 
 export interface Checklist {
