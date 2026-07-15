@@ -143,6 +143,7 @@ export default function App() {
             const metaSnap = await getDoc(metaRef);
             if (metaSnap.exists() && metaSnap.data()?.seeded) {
               setChannels([]);
+              localStorage.setItem('creator_channels', JSON.stringify([]));
               setLoadingCloud(false);
               return;
             }
@@ -161,6 +162,7 @@ export default function App() {
             list.push(doc.data() as Channel);
           });
           setChannels(list);
+          localStorage.setItem('creator_channels', JSON.stringify(list));
         }
         setLoadingCloud(false);
       },
@@ -178,6 +180,7 @@ export default function App() {
             const metaSnap = await getDoc(metaRef);
             if (metaSnap.exists() && metaSnap.data()?.seeded) {
               setVideos([]);
+              localStorage.setItem('creator_videos', JSON.stringify([]));
               return;
             }
 
@@ -195,6 +198,7 @@ export default function App() {
             list.push(doc.data() as Video);
           });
           setVideos(list);
+          localStorage.setItem('creator_videos', JSON.stringify(list));
         }
       },
       (error) => {
@@ -211,6 +215,7 @@ export default function App() {
             const metaSnap = await getDoc(metaRef);
             if (metaSnap.exists() && metaSnap.data()?.seeded) {
               setIdeas([]);
+              localStorage.setItem('creator_ideas', JSON.stringify([]));
               return;
             }
 
@@ -228,6 +233,7 @@ export default function App() {
             list.push(doc.data() as Idea);
           });
           setIdeas(list);
+          localStorage.setItem('creator_ideas', JSON.stringify(list));
         }
       },
       (error) => {
