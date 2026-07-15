@@ -20,6 +20,7 @@ import {
   Check,
   Video as VideoIcon,
   Database,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Channel, Video, VideoStatus, Idea } from './types';
 import StatsSection from './components/StatsSection';
@@ -28,6 +29,7 @@ import VideoModal from './components/VideoModal';
 import DetailModal from './components/DetailModal';
 import CalendarView from './components/CalendarView';
 import IdeasView from './components/IdeasView';
+import GoogleSheetsModal from './components/GoogleSheetsModal';
 import { onSnapshot, collection, doc, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from './lib/firebase';
 
@@ -119,6 +121,7 @@ export default function App() {
   const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isGoogleSheetsModalOpen, setIsGoogleSheetsModalOpen] = useState(false);
 
   // Focus Video for Edit/Detail
   const [focusedVideo, setFocusedVideo] = useState<Video | null>(null);
@@ -647,6 +650,15 @@ export default function App() {
               <span>Channels ({channels.length})</span>
             </button>
 
+            {/* Google Sheets Button */}
+            <button
+              onClick={() => setIsGoogleSheetsModalOpen(true)}
+              className="hidden md:flex px-3.5 py-2 border border-gray-200 dark:border-[#2A2F3B] bg-emerald-500/5 hover:bg-emerald-500/10 dark:bg-emerald-500/5 dark:hover:bg-emerald-500/10 text-emerald-600 dark:text-[#3ED586] font-bold text-xs rounded-xl transition-all items-center gap-1.5 cursor-pointer"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>Sheets Import</span>
+            </button>
+
             {/* User Profile Info */}
             <div className="flex items-center gap-2 pl-2 border-l border-gray-200 dark:border-[#2A2F3B] h-8 ml-1">
               <div className="w-8 h-8 rounded-full bg-linear-to-tr from-[#E11D2E] to-[#FF4655] text-white flex items-center justify-center text-xs font-bold font-sans shadow-xs transition-transform hover:scale-105" title="satnamsinghking84@gmail.com">
@@ -701,6 +713,15 @@ export default function App() {
           {/* Search & Channel Selector & New Video */}
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full md:w-auto">
             
+            {/* Google Sheets Import Button */}
+            <button
+              onClick={() => setIsGoogleSheetsModalOpen(true)}
+              className="px-4 py-2 border border-emerald-200 dark:border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10 dark:bg-emerald-500/5 dark:hover:bg-emerald-500/10 text-emerald-600 dark:text-[#3ED586] font-bold text-xs md:text-[13px] rounded-[10px] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-500 dark:text-[#3ED586]" />
+              <span>Sheets Import</span>
+            </button>
+
             {/* Manage Channels Button */}
             <button
               onClick={() => setIsChannelModalOpen(true)}
@@ -939,6 +960,14 @@ export default function App() {
           setIsDetailModalOpen(false);
           setIsVideoModalOpen(true);
         }}
+      />
+
+      {/* MODAL 4: Google Sheets Importer */}
+      <GoogleSheetsModal
+        isOpen={isGoogleSheetsModalOpen}
+        onClose={() => setIsGoogleSheetsModalOpen(false)}
+        channels={channels}
+        onImportComplete={(message) => triggerToast(message)}
       />
 
     </div>
