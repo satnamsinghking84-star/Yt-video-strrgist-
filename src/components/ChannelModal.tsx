@@ -71,7 +71,7 @@ export default function ChannelModal({
         <div className="p-[18px] md:p-5 flex flex-col gap-4">
           <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
             <div className="field">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
                 Channel Naam
               </label>
               <input
@@ -85,7 +85,7 @@ export default function ChannelModal({
             </div>
 
             <div className="field">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
                 Handle (optional)
               </label>
               <input
@@ -98,7 +98,7 @@ export default function ChannelModal({
             </div>
 
             <div className="field">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
                 Color
               </label>
               <div className="flex gap-2 flex-wrap">
@@ -131,12 +131,12 @@ export default function ChannelModal({
 
           {/* Channel List */}
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-2.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-2.5 font-sans">
               Current Channels
             </label>
             <div className="flex flex-col gap-2">
               {channels.length === 0 ? (
-                <p className="text-xs text-gray-400 dark:text-[#6A7180] text-center py-4">
+                <p className="text-xs text-gray-400 dark:text-[#6A7180] text-center py-4 font-sans">
                   Abhi koi channel nahi hai
                 </p>
               ) : (
@@ -152,27 +152,27 @@ export default function ChannelModal({
                         {c.name}
                       </span>
                       {c.handle && !isConfirming && (
-                        <span className="text-[11px] text-gray-400 dark:text-[#6A7180] truncate max-w-[120px]">
+                        <span className="text-[11px] text-gray-400 dark:text-[#6A7180] truncate max-w-[120px] font-sans">
                           {c.handle}
                         </span>
                       )}
                       {isConfirming ? (
                         <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <span className="text-[11px] font-bold text-[#E11D2E] dark:text-[#FF4655]">Sure?</span>
+                          <span className="text-[11px] font-bold text-[#E11D2E] dark:text-[#FF4655] font-sans">Sure?</span>
                           <button
                             type="button"
                             onClick={() => {
                               onDeleteChannel(c.id);
                               setConfirmDeleteId(null);
                             }}
-                            className="bg-[#E11D2E] dark:bg-[#FF4655] text-white dark:text-[#0E1015] px-2 py-0.5 rounded-md text-[11px] font-bold hover:brightness-110"
+                            className="bg-[#E11D2E] dark:bg-[#FF4655] text-white dark:text-[#0E1015] px-2 py-0.5 rounded-md text-[11px] font-bold hover:brightness-110 font-sans"
                           >
                             Yes
                           </button>
                           <button
                             type="button"
                             onClick={() => setConfirmDeleteId(null)}
-                            className="bg-gray-200 dark:bg-[#2A2F3B] text-gray-700 dark:text-[#9AA0AF] px-2 py-0.5 rounded-md text-[11px] font-bold hover:brightness-110"
+                            className="bg-gray-200 dark:bg-[#2A2F3B] text-gray-700 dark:text-[#9AA0AF] px-2 py-0.5 rounded-md text-[11px] font-bold hover:brightness-110 font-sans"
                           >
                             No
                           </button>

@@ -1,0 +1,145 @@
+{
+  "entities": {
+    "Channel": {
+      "title": "Channel",
+      "description": "A YouTube or content channel managed by the creator",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique channel identifier",
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the channel",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "handle": {
+          "type": "string",
+          "description": "Channel handle starting with @",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "color": {
+          "type": "string",
+          "description": "Hex color code representing the channel style",
+          "minLength": 4,
+          "maxLength": 20
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp of channel creation"
+        }
+      },
+      "required": ["id", "name", "handle", "color", "createdAt"]
+    },
+    "Video": {
+      "title": "Video",
+      "description": "A video project in the production pipeline",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique video project identifier",
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "channelId": {
+          "type": "string",
+          "description": "Reference to the Channel entity",
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the video",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "description": "Short summary or brief of the video",
+          "maxLength": 2000
+        },
+        "script": {
+          "type": "string",
+          "description": "Written script or bullet points",
+          "maxLength": 10000
+        },
+        "voiceNotes": {
+          "type": "string",
+          "description": "Audio voice notes details or transcripts",
+          "maxLength": 2000
+        },
+        "status": {
+          "type": "string",
+          "description": "Workflow step",
+          "enum": ["Pending", "Scheduled", "Published"]
+        },
+        "scheduledDate": {
+          "type": "string",
+          "description": "Scheduled publish date-time (YYYY-MM-DDTHH:MM)"
+        },
+        "checklist": {
+          "type": "object",
+          "description": "Checklist representing the steps completed"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp of video creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": ["id", "channelId", "title", "status", "checklist", "createdAt", "updatedAt"]
+    },
+    "Idea": {
+      "title": "Idea",
+      "description": "A draft idea in the scratchpad",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique idea identifier",
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "text": {
+          "type": "string",
+          "description": "Text content of the idea",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "channelId": {
+          "type": "string",
+          "description": "Reference to the Channel entity",
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp of idea creation"
+        }
+      },
+      "required": ["id", "text", "channelId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "channels/{channelId}": {
+      "schema": "Channel",
+      "description": "Collection of YouTube channels"
+    },
+    "videos/{videoId}": {
+      "schema": "Video",
+      "description": "Collection of video projects"
+    },
+    "ideas/{ideaId}": {
+      "schema": "Idea",
+      "description": "Collection of content scratchpad ideas"
+    }
+  }
+}

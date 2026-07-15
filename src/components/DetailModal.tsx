@@ -86,7 +86,7 @@ export default function DetailModal({
                   key={s}
                   type="button"
                   onClick={() => onStatusChange(video.id, s)}
-                  className={`py-2 rounded-[10px] border text-xs md:text-[13px] font-bold text-center transition-all ${
+                  className={`py-2 rounded-[10px] border text-xs md:text-[13px] font-bold text-center transition-all font-sans ${
                     video.status === s
                       ? activeStyle
                       : 'bg-gray-50 dark:bg-[#1D212B] text-gray-500 dark:text-[#9AA0AF] border-gray-200 dark:border-[#2A2F3B]'
@@ -100,7 +100,7 @@ export default function DetailModal({
 
           {/* Production Checklist */}
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-2.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-2.5 font-sans">
               Production Checklist
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -125,7 +125,7 @@ export default function DetailModal({
                     >
                       {checked && <Check className="w-3 h-3 text-white dark:text-[#0E1015]" />}
                     </span>
-                    <span className="text-xs font-bold text-gray-900 dark:text-[#F0F1F4]">{label}</span>
+                    <span className="text-xs font-bold text-gray-900 dark:text-[#F0F1F4] font-sans">{label}</span>
                   </button>
                 );
               })}
@@ -134,7 +134,7 @@ export default function DetailModal({
 
           {/* Description */}
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
               Description
             </label>
             <div
@@ -150,7 +150,7 @@ export default function DetailModal({
 
           {/* Script */}
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
               Script / Talking Points
             </label>
             <div
@@ -166,7 +166,7 @@ export default function DetailModal({
 
           {/* Voice Notes */}
           <div>
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
               Voice Notes
             </label>
             <div
@@ -185,21 +185,21 @@ export default function DetailModal({
         <div className="p-[18px] md:p-5 border-t border-gray-200 dark:border-[#2A2F3B] flex justify-between items-center bg-gray-50 dark:bg-[#1D212B] rounded-b-[20px] gap-4">
           {isConfirmingDelete ? (
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-[#C53030]">Sure?</span>
+              <span className="text-[11px] font-bold text-[#C53030] font-sans">Sure?</span>
               <button
                 type="button"
                 onClick={() => {
                   onDelete(video.id);
                   setIsConfirmingDelete(false);
                 }}
-                className="bg-[#C53030] text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:brightness-110"
+                className="bg-[#C53030] text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:brightness-110 font-sans"
               >
                 Haan, Delete
               </button>
               <button
                 type="button"
                 onClick={() => setIsConfirmingDelete(false)}
-                className="border border-gray-200 dark:border-[#2A2F3B] bg-white dark:bg-[#171A22] text-gray-600 dark:text-[#9AA0AF] px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="border border-gray-200 dark:border-[#2A2F3B] bg-white dark:bg-[#171A22] text-gray-600 dark:text-[#9AA0AF] px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-gray-100 dark:hover:bg-gray-800 font-sans"
               >
                 Cancel
               </button>
@@ -207,7 +207,7 @@ export default function DetailModal({
           ) : (
             <button
               onClick={() => setIsConfirmingDelete(true)}
-              className="flex items-center gap-1.5 text-[#C53030] hover:text-[#E53E3E] text-[12.5px] font-bold bg-transparent border-none p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/25 transition-colors"
+              className="flex items-center gap-1.5 text-[#C53030] hover:text-[#E53E3E] text-[12.5px] font-bold bg-transparent border-none p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/25 transition-colors font-sans"
             >
               <Trash2 className="w-4 h-4" />
               Delete
@@ -215,7 +215,7 @@ export default function DetailModal({
           )}
           <button
             onClick={() => onEdit(video)}
-            className="flex items-center gap-1.5 px-5 py-2 rounded-[11px] border border-gray-200 dark:border-[#2A2F3B] bg-white dark:bg-[#171A22] text-gray-700 dark:text-[#9AA0AF] font-bold text-[13px] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-1.5 px-5 py-2 rounded-[11px] border border-gray-200 dark:border-[#2A2F3B] bg-white dark:bg-[#171A22] text-gray-700 dark:text-[#9AA0AF] font-bold text-[13px] hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-sans"
           >
             <Edit3 className="w-4 h-4" />
             Edit Details

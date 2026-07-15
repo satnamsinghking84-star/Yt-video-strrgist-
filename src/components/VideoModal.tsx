@@ -101,7 +101,7 @@ export default function VideoModal({
             <h3 className="text-base font-bold text-gray-900 dark:text-[#F0F1F4] font-display">
               {video ? 'Video Details Edit Karein' : 'Naya Video Jodein'}
             </h3>
-            <p className="text-[11.5px] text-gray-500 dark:text-[#9AA0AF] mt-0.5">Video ki details bharein</p>
+            <p className="text-[11.5px] text-gray-500 dark:text-[#9AA0AF] mt-0.5 font-sans">Video ki details bharein</p>
           </div>
           <button
             onClick={onClose}
@@ -114,7 +114,7 @@ export default function VideoModal({
         {/* Modal Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-[18px] md:p-5 flex flex-col gap-4">
           <div className="field">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
               Channel
             </label>
             <select
@@ -132,7 +132,7 @@ export default function VideoModal({
           </div>
 
           <div className="field">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
               Title
             </label>
             <input
@@ -146,7 +146,7 @@ export default function VideoModal({
           </div>
 
           <div className="field">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
               Description
             </label>
             <textarea
@@ -159,7 +159,7 @@ export default function VideoModal({
           </div>
 
           <div className="field">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
               Script / Talking Points
             </label>
             <textarea
@@ -172,7 +172,7 @@ export default function VideoModal({
           </div>
 
           <div className="field">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
               Voice Notes
             </label>
             <textarea
@@ -185,7 +185,7 @@ export default function VideoModal({
           </div>
 
           <div className="field">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-2">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-2 font-sans">
               Status
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -200,7 +200,7 @@ export default function VideoModal({
                     key={s}
                     type="button"
                     onClick={() => setStatus(s)}
-                    className={`py-2 rounded-[10px] border text-xs md:text-[13px] font-bold text-center transition-all ${
+                    className={`py-2 rounded-[10px] border text-xs md:text-[13px] font-bold text-center transition-all font-sans ${
                       status === s
                         ? activeStyle
                         : 'bg-gray-50 dark:bg-[#1D212B] text-gray-500 dark:text-[#9AA0AF] border-gray-200 dark:border-[#2A2F3B]'
@@ -215,7 +215,7 @@ export default function VideoModal({
 
           {status === 'Scheduled' && (
             <div className="field animate-fadeIn">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
                 Scheduled Date & Time
               </label>
               <input
@@ -228,7 +228,7 @@ export default function VideoModal({
             </div>
           )}
 
-          {error && <p className="text-[#E11D2E] dark:text-[#FF4655] text-xs font-bold mt-1">{error}</p>}
+          {error && <p className="text-[#E11D2E] dark:text-[#FF4655] text-xs font-bold mt-1 font-sans">{error}</p>}
         </form>
 
         {/* Modal Foot */}
@@ -236,14 +236,14 @@ export default function VideoModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-[11px] border border-gray-200 dark:border-[#2A2F3B] bg-white dark:bg-[#171A22] text-gray-600 dark:text-[#9AA0AF] text-[13px] font-bold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="flex-1 py-2.5 rounded-[11px] border border-gray-200 dark:border-[#2A2F3B] bg-white dark:bg-[#171A22] text-gray-600 dark:text-[#9AA0AF] text-[13px] font-bold hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors font-sans"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSubmit}
-            className="flex-1 py-2.5 rounded-[11px] bg-[#E11D2E] dark:bg-[#FF4655] text-white dark:text-[#0E1015] font-bold text-[13px] hover:brightness-110 active:scale-[0.99] transition-transform flex items-center justify-center"
+            className="flex-1 py-2.5 rounded-[11px] bg-[#E11D2E] dark:bg-[#FF4655] text-white dark:text-[#0E1015] font-bold text-[13px] hover:brightness-110 active:scale-[0.99] transition-transform flex items-center justify-center font-sans"
           >
             Save Video
           </button>

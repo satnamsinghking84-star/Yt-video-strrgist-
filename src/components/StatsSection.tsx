@@ -1,5 +1,5 @@
 import React from 'react';
-import { Video, Channel } from '../types';
+import { Video } from '../types';
 
 interface StatsSectionProps {
   videos: Video[];
@@ -23,19 +23,19 @@ export default function StatsSection({ videos }: StatsSectionProps) {
       {/* Cards Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-3">
         <div className="bg-white dark:bg-[#171A22] border border-gray-200 dark:border-[#2A2F3B] rounded-[14px] p-3.5 shadow-xs transition-colors duration-150">
-          <div className="text-[10px] font-bold text-gray-500 dark:text-[#9AA0AF] uppercase tracking-wider">Total Videos</div>
+          <div className="text-[10px] font-bold text-gray-500 dark:text-[#9AA0AF] uppercase tracking-wider font-sans">Total Videos</div>
           <div className="font-display text-2xl font-bold text-gray-900 dark:text-[#F0F1F4] mt-1">{total}</div>
         </div>
         <div className="bg-white dark:bg-[#171A22] border border-gray-200 dark:border-[#2A2F3B] rounded-[14px] p-3.5 shadow-xs transition-colors duration-150">
-          <div className="text-[10px] font-bold text-gray-500 dark:text-[#9AA0AF] uppercase tracking-wider">Pending</div>
+          <div className="text-[10px] font-bold text-gray-500 dark:text-[#9AA0AF] uppercase tracking-wider font-sans">Pending</div>
           <div className="font-display text-2xl font-bold text-[#B4690E] dark:text-[#F5A544] mt-1">{pending}</div>
         </div>
         <div className="bg-white dark:bg-[#171A22] border border-gray-200 dark:border-[#2A2F3B] rounded-[14px] p-3.5 shadow-xs transition-colors duration-150">
-          <div className="text-[10px] font-bold text-gray-500 dark:text-[#9AA0AF] uppercase tracking-wider">Scheduled</div>
+          <div className="text-[10px] font-bold text-gray-500 dark:text-[#9AA0AF] uppercase tracking-wider font-sans">Scheduled</div>
           <div className="font-display text-2xl font-bold text-[#2557C7] dark:text-[#6C9CFF] mt-1">{scheduled}</div>
         </div>
         <div className="bg-white dark:bg-[#171A22] border border-gray-200 dark:border-[#2A2F3B] rounded-[14px] p-3.5 shadow-xs transition-colors duration-150">
-          <div className="text-[10px] font-bold text-gray-500 dark:text-[#9AA0AF] uppercase tracking-wider">Published</div>
+          <div className="text-[10px] font-bold text-gray-500 dark:text-[#9AA0AF] uppercase tracking-wider font-sans">Published</div>
           <div className="font-display text-2xl font-bold text-[#158A4C] dark:text-[#3ED586] mt-1">{published}</div>
         </div>
       </div>
