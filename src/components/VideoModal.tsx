@@ -19,6 +19,7 @@ interface VideoModalProps {
   }) => void;
   initialTitle?: string; // Prepopulated from Ideas conversion
   initialChannelId?: string; // Prepopulated from Ideas conversion
+  onAddChannelClick?: () => void;
 }
 
 export default function VideoModal({
@@ -29,6 +30,7 @@ export default function VideoModal({
   onSave,
   initialTitle = '',
   initialChannelId = '',
+  onAddChannelClick,
 }: VideoModalProps) {
   const [channelId, setChannelId] = useState('');
   const [title, setTitle] = useState('');
@@ -124,9 +126,20 @@ export default function VideoModal({
         {/* Modal Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-[18px] md:p-5 flex flex-col gap-4">
           <div className="field">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
-              Channel
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] font-sans">
+                Channel
+              </label>
+              {onAddChannelClick && (
+                <button
+                  type="button"
+                  onClick={onAddChannelClick}
+                  className="text-[11px] font-bold text-[#E11D2E] dark:text-[#FF4655] hover:underline bg-transparent border-none cursor-pointer p-0"
+                >
+                  + Naya Channel Jodein
+                </button>
+              )}
+            </div>
             <select
               value={channelId}
               onChange={(e) => setChannelId(e.target.value)}

@@ -18,6 +18,8 @@ import {
   Upload,
   Cloud,
   Check,
+  Video as VideoIcon,
+  Database,
 } from 'lucide-react';
 import { Channel, Video, VideoStatus, Idea } from './types';
 import StatsSection from './components/StatsSection';
@@ -250,7 +252,18 @@ export default function App() {
   const handleDeleteChannel = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'channels', id));
-      triggerToast('Channel hataya gaya');
+      
+      // Delete all videos and posts associated with this channel
+      const associatedVideos = videos.filter((v) => v.channelId === id);
+      const videoDeletes = associatedVideos.map((v) => deleteDoc(doc(db, 'videos', v.id)));
+
+      // Delete all ideas associated with this channel
+      const associatedIdeas = ideas.filter((i) => i.channelId === id);
+      const ideaDeletes = associatedIdeas.map((i) => deleteDoc(doc(db, 'ideas', i.id)));
+
+      await Promise.all([...videoDeletes, ...ideaDeletes]);
+      
+      triggerToast('Channel aur uski sari posts, videos aur ideas delete kar diye gaye');
     } catch (error) {
       handleFirestoreError(error, OperationType.DELETE, `channels/${id}`);
       triggerToast('Error: Channel delete nahi ho saka');
@@ -496,22 +509,26 @@ export default function App() {
       )}
 
       {/* Header Bar */}
-      <header className="border-b border-gray-200 dark:border-[#1D212B] bg-white dark:bg-[#171A22] sticky top-0 z-40 transition-colors">
+      <header className="sticky top-0 z-40 w-full border-b border-gray-100 dark:border-[#1E2330] bg-white/90 dark:bg-[#0E1015]/90 backdrop-blur-md transition-all duration-200">
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           
-          {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="bg-[#E11D2E] text-white p-2 rounded-[11px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5" />
+          {/* Logo & Brand Info */}
+          <div className="flex items-center gap-3">
+            <div className="bg-linear-to-tr from-[#E11D2E] to-[#FF4655] text-white p-2.5 rounded-xl flex items-center justify-center shadow-md shadow-[#E11D2E]/10 transition-transform hover:scale-105">
+              <VideoIcon className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 id="appTitle" className="text-base font-extrabold text-gray-900 dark:text-white leading-none tracking-tight font-display">
+                <h1 id="appTitle" className="text-base md:text-lg font-black text-gray-900 dark:text-white leading-none tracking-tight font-display">
                   Creator Hisaab
                 </h1>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-[#158A4C]/10 text-[#158A4C] dark:text-[#3ED586] border border-[#158A4C]/15 select-none animate-pulse">
-                  <Cloud className="w-3 h-3" />
-                  <span>Cloud Active</span>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-[#3ED586] border border-emerald-500/20 select-none">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                  </span>
+                  <span className="hidden sm:inline">Cloud Synced</span>
+                  <span className="sm:hidden">Live</span>
                 </span>
               </div>
               <span className="text-[10px] font-bold text-gray-400 dark:text-[#6A7180] tracking-wider uppercase font-sans mt-0.5 block">
@@ -520,45 +537,68 @@ export default function App() {
             </div>
           </div>
 
-          {/* Quick Actions (Theme, Backup, Channels) */}
-          <div className="flex items-center gap-2 md:gap-3">
+          {/* Quick Actions & Profile Panel */}
+          <div className="flex items-center gap-2.5">
             
-            {/* Backup Exporter */}
-            <button
-              onClick={handleExportData}
-              title="Backup export karein (JSON)"
-              className="p-2 border border-gray-200 dark:border-[#2A2F3B] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-[10px] text-gray-500 dark:text-[#9AA0AF] transition-all flex items-center justify-center"
-            >
-              <Download className="w-4 h-4" />
-            </button>
+            {/* Backup Operations Group */}
+            <div className="flex items-center bg-gray-50 dark:bg-[#171A22] border border-gray-200/80 dark:border-[#2A2F3B] rounded-xl p-0.5">
+              {/* Backup Exporter */}
+              <button
+                onClick={handleExportData}
+                title="Backup export karein (JSON)"
+                className="p-2 hover:bg-gray-200/50 dark:hover:bg-gray-800/60 rounded-lg text-gray-500 dark:text-[#9AA0AF] transition-all flex items-center justify-center cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+              </button>
 
-            {/* Backup Importer */}
-            <label className="p-2 border border-gray-200 dark:border-[#2A2F3B] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-[10px] text-gray-500 dark:text-[#9AA0AF] transition-all flex items-center justify-center cursor-pointer">
-              <Upload className="w-4 h-4" />
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImportData}
-                className="hidden"
-              />
-            </label>
+              {/* Divider */}
+              <div className="w-[1px] h-4 bg-gray-200 dark:bg-[#2A2F3B]" />
 
-            {/* Dark Mode toggle */}
+              {/* Backup Importer */}
+              <label className="p-2 hover:bg-gray-200/50 dark:hover:bg-gray-800/60 rounded-lg text-gray-500 dark:text-[#9AA0AF] transition-all flex items-center justify-center cursor-pointer">
+                <Upload className="w-4 h-4" />
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleImportData}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {/* Dark Mode Toggle */}
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 border border-gray-200 dark:border-[#2A2F3B] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-[10px] text-gray-500 dark:text-[#9AA0AF] transition-all flex items-center justify-center"
+              title="Theme change karein"
+              className="p-2 bg-gray-50 dark:bg-[#171A22] border border-gray-200/80 dark:border-[#2A2F3B] hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl text-gray-500 dark:text-[#9AA0AF] transition-all flex items-center justify-center cursor-pointer"
             >
               {isDarkMode ? <Sun className="w-4 h-4 text-[#FFB800]" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            {/* Channels Modal Open */}
+            {/* Channels Button */}
             <button
               onClick={() => setIsChannelModalOpen(true)}
-              className="px-3.5 py-2 border border-gray-200 dark:border-[#2A2F3B] bg-white dark:bg-transparent text-gray-700 dark:text-[#9AA0AF] font-bold text-xs md:text-[13px] rounded-[10px] hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex items-center gap-1.5"
+              className="hidden md:flex px-3.5 py-2 border border-gray-200 dark:border-[#2A2F3B] bg-[#E11D2E]/5 hover:bg-[#E11D2E]/10 dark:bg-[#FF4655]/5 dark:hover:bg-[#FF4655]/10 text-[#E11D2E] dark:text-[#FF4655] font-bold text-xs rounded-xl transition-all items-center gap-1.5 cursor-pointer"
             >
               <Tv className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Channels ({channels.length})</span>
+              <span>Channels ({channels.length})</span>
             </button>
+
+            {/* User Profile Info */}
+            <div className="flex items-center gap-2 pl-2 border-l border-gray-200 dark:border-[#2A2F3B] h-8 ml-1">
+              <div className="w-8 h-8 rounded-full bg-linear-to-tr from-[#E11D2E] to-[#FF4655] text-white flex items-center justify-center text-xs font-bold font-sans shadow-xs transition-transform hover:scale-105" title="satnamsinghking84@gmail.com">
+                S
+              </div>
+              <div className="hidden lg:flex flex-col items-start leading-none">
+                <span className="text-[11px] font-bold text-gray-700 dark:text-[#F0F1F4] max-w-[110px] truncate">
+                  Satnam Singh
+                </span>
+                <span className="text-[9px] text-gray-400 dark:text-[#6A7180] mt-0.5">
+                  Creator Account
+                </span>
+              </div>
+            </div>
+
           </div>
         </div>
       </header>
@@ -598,6 +638,15 @@ export default function App() {
           {/* Search & Channel Selector & New Video */}
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full md:w-auto">
             
+            {/* Manage Channels Button */}
+            <button
+              onClick={() => setIsChannelModalOpen(true)}
+              className="px-4 py-2 border border-gray-200 dark:border-[#2A2F3B] bg-white dark:bg-[#1D212B] hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-[#9AA0AF] font-bold text-xs md:text-[13px] rounded-[10px] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Tv className="w-4 h-4 text-[#E11D2E]" />
+              <span>Channels ({channels.length})</span>
+            </button>
+
             {/* New Video Button */}
             <button
               onClick={() => {
@@ -766,6 +815,7 @@ export default function App() {
             onAddIdea={handleAddIdea}
             onDeleteIdea={handleDeleteIdea}
             onConvertToVideo={handleConvertToVideo}
+            onAddChannelClick={() => setIsChannelModalOpen(true)}
           />
         )}
 
@@ -802,6 +852,10 @@ export default function App() {
         onSave={handleSaveVideo}
         initialTitle={initialTitle}
         initialChannelId={initialChannelId}
+        onAddChannelClick={() => {
+          setIsVideoModalOpen(false);
+          setIsChannelModalOpen(true);
+        }}
       />
 
       {/* MODAL 3: Detail View / Production Checklist tracker */}
@@ -921,7 +975,7 @@ function VideoCard({ video, channels, onClick, onChecklistToggle, onStatusChange
             const isDone = video.checklist[k];
             return (
               <div
-                key={k}
+                key={String(k)}
                 className={`flex-1 h-full rounded-full transition-all duration-300 ${
                   isDone ? 'bg-[#158A4C] dark:bg-[#3ED586]' : 'bg-gray-100 dark:bg-[#1D212B]'
                 }`}
@@ -946,7 +1000,7 @@ function VideoCard({ video, channels, onClick, onChecklistToggle, onStatusChange
           const checked = video.checklist[k];
           return (
             <button
-              key={k}
+              key={String(k)}
               onClick={(e) => {
                 e.stopPropagation();
                 onChecklistToggle(video.id, k);

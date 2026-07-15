@@ -8,6 +8,7 @@ interface IdeasViewProps {
   onAddIdea: (text: string, channelId: string) => void;
   onDeleteIdea: (id: string) => void;
   onConvertToVideo: (idea: Idea) => void;
+  onAddChannelClick?: () => void;
 }
 
 const SAMPLE_TEMPLATES = [
@@ -26,6 +27,7 @@ export default function IdeasView({
   onAddIdea,
   onDeleteIdea,
   onConvertToVideo,
+  onAddChannelClick,
 }: IdeasViewProps) {
   const [text, setText] = useState('');
   const [channelId, setChannelId] = useState('');
@@ -86,9 +88,20 @@ export default function IdeasView({
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
           <div className="field">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] mb-1.5 font-sans">
-              Select Channel
-            </label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-[#9AA0AF] font-sans">
+                Select Channel
+              </label>
+              {onAddChannelClick && (
+                <button
+                  type="button"
+                  onClick={onAddChannelClick}
+                  className="text-[11px] font-bold text-[#E11D2E] dark:text-[#FF4655] hover:underline bg-transparent border-none cursor-pointer p-0"
+                >
+                  + Naya Channel Jodein
+                </button>
+              )}
+            </div>
             <select
               value={channelId}
               onChange={(e) => setChannelId(e.target.value)}
