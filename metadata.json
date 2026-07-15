@@ -1,0 +1,6 @@
+{
+  "name": "Creator Hisaab",
+  "description": "Video pipeline manager for content creators to track scripts, voice notes, editing, and publishing schedules.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
