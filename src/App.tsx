@@ -17,6 +17,7 @@ import {
   Download,
   Upload,
   Cloud,
+  Check,
 } from 'lucide-react';
 import { Channel, Video, VideoStatus, Idea } from './types';
 import StatsSection from './components/StatsSection';
@@ -832,6 +833,15 @@ interface VideoCardProps {
   onStatusChange: (id: string, newStatus: VideoStatus) => void;
 }
 
+const CHECKLIST_ORDER: [keyof Video['checklist'], string][] = [
+  ['script', 'Script'],
+  ['voice', 'Voice'],
+  ['fullVideo', 'Editing'],
+  ['thumbnail', 'Thumbnail'],
+  ['title', 'Title'],
+  ['description', 'Description'],
+];
+
 function VideoCard({ video, channels, onClick, onChecklistToggle, onStatusChange }: VideoCardProps) {
   const currentChannel = channels.find((c) => c.id === video.channelId);
   const chanColor = currentChannel?.color || '#8A93A6';
@@ -877,18 +887,12 @@ function VideoCard({ video, channels, onClick, onChecklistToggle, onStatusChange
         {video.title}
       </h4>
 
-      {/* Progress mini indicator */}
-      <div className="flex items-center gap-1.5 mt-0.5">
-        <div className="flex-1 h-1.5 bg-gray-100 dark:bg-[#1D212B] rounded-full overflow-hidden">
-          <div
-            className="h-full bg-[#158A4C] dark:bg-[#3ED586] transition-all duration-300"
-            style={{ width: `${(doneCount / 6) * 100}%` }}
-          />
-        </div>
-        <span className="text-[10px] font-bold text-gray-400 dark:text-[#6A7180] font-mono whitespace-nowrap">
-          {doneCount}/6 step
-        </span>
-      </div>
+      {/* Description */}
+      {video.description && (
+        <p className="text-[11.5px] text-gray-500 dark:text-[#9AA0AF] line-clamp-2 leading-relaxed font-sans">
+          {video.description}
+        </p>
+      )}
 
       {/* Date Timings */}
       {video.status === 'Scheduled' && video.scheduledDate && (
@@ -897,6 +901,66 @@ function VideoCard({ video, channels, onClick, onChecklistToggle, onStatusChange
           <span>{new Date(video.scheduledDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} at {new Date(video.scheduledDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
       )}
+
+      {/* Segmented Progress bar & text */}
+      <div className="flex flex-col gap-1.5 mt-0.5">
+        <div className="flex gap-1.5 h-1.5">
+          {checklistKeys.map((k) => {
+            const isDone = video.checklist[k];
+            return (
+              <div
+                key={k}
+                className={`flex-1 h-full rounded-full transition-all duration-300 ${
+                  isDone ? 'bg-[#158A4C] dark:bg-[#3ED586]' : 'bg-gray-100 dark:bg-[#1D212B]'
+                }`}
+              />
+            );
+          })}
+        </div>
+        <div className="flex justify-between items-center text-[10px] font-bold font-sans text-gray-400 dark:text-[#6A7180]">
+          <span>{doneCount}/6 steps completed</span>
+          <span className="bg-gray-100 dark:bg-[#1D212B] px-1 py-0.5 rounded text-[9.5px]">
+            {Math.round((doneCount / 6) * 100)}%
+          </span>
+        </div>
+      </div>
+
+      {/* Interactive Checklist Grid */}
+      <div
+        className="grid grid-cols-2 gap-1.5 mt-2 pt-2 border-t border-gray-100 dark:border-[#1D212B]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {CHECKLIST_ORDER.map(([k, label]) => {
+          const checked = video.checklist[k];
+          return (
+            <button
+              key={k}
+              onClick={(e) => {
+                e.stopPropagation();
+                onChecklistToggle(video.id, k);
+              }}
+              className={`flex items-center gap-2 p-1.5 rounded-[8px] border text-left transition-all active:scale-[0.98] cursor-pointer ${
+                checked
+                  ? 'bg-[#E7F6EE] dark:bg-[#0F2A1E] border-[#158A4C] dark:border-[#3ED586]'
+                  : 'bg-gray-50 dark:bg-[#1D212B] border-gray-200 dark:border-[#2A2F3B]'
+              }`}
+            >
+              <span
+                className={`w-[13px] h-[13px] rounded-[3px] border flex-shrink-0 flex items-center justify-center transition-all ${
+                  checked
+                    ? 'bg-[#158A4C] dark:bg-[#3ED586] border-[#158A4C] dark:border-[#3ED586]'
+                    : 'border-gray-400 dark:border-gray-600'
+                }`}
+              >
+                {checked && <Check className="w-2.5 h-2.5 text-white dark:text-[#0E1015]" />}
+              </span>
+              <span className="text-[10px] font-bold text-gray-800 dark:text-[#F0F1F4] font-sans truncate">
+                {label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
